@@ -128,3 +128,16 @@ def findUserByName(username):
     resultSet = cur.fetchall()
     if(resultSet!=()):  return resultSet
     return None
+
+# return data set
+@app.get("/dataset")
+def dataset():
+   profitData = ['46','56', '57', '79', '92',
+            '20', '57', '76']
+   salesData = ['40','30', '35', '340', '98',
+            '20', '33', '32']
+   response = {
+      "profitData":profitData,
+      "salesData":salesData
+   }
+   return response,200;
