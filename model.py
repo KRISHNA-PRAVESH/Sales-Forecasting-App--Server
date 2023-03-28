@@ -49,7 +49,7 @@ def main(periodicity,num):
     # Evaluation
     # metrics()
     initial = df.index[len(df)-1]
-    final = initial + pd.Timedelta(days=30*int(num))
+    final = initial + pd.Timedelta(days=31*int(num))
     pred = predict(initial,final)
 
     # Plotting the graph
@@ -57,17 +57,19 @@ def main(periodicity,num):
 
 # returns the data points for the graph
 def datapts():
-    dates = pd.date_range(start=initial,end=final,freq='M')
+    # values of x axis
+    dates = pred.index.values
     labels = []
     for x in dates:
-      labels.append(str(x).split(" ")[0])
+      labels.append(str(x).split("T")[0])
     
+    # Values of y -axis
     sales = pred.tolist()
     response = {
       "labels":labels,
       "sales":sales
      }
-    return response
+    return response 
 
 
 if __name__=="__main__":

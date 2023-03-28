@@ -2,6 +2,7 @@ from flask import Flask
 from flask import render_template,request,jsonify
 from flask_cors import CORS
 from flask_mysqldb import MySQL
+import os
 
 # importing the ML model
 import model as md
@@ -97,6 +98,17 @@ def login():
        "statusCode":500,
        "responseMessage":"Internal Server Error"
     }),500;
+
+@app.get('/logout')
+def logout():
+   try:
+      # deleting the saved files when the user logs out
+      os.remove(f"{UPLOAD_FOLDER}/dataset.csv")
+      os.remove(f"{UPLOAD_FOLDER}/predictions.csv")
+   except:
+      # If file didnot exist in the first place
+      pass
+   return "Logged out",200
 
    
 
