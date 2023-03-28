@@ -118,7 +118,7 @@ def save():
     # Saving the received file in the uploads folder with the name dataset.csv
     file.save(f"{UPLOAD_FOLDER}/dataset.csv")
    #  Building model
-   #  md.main(periodicity,num)
+    md.main(periodicity,num)
     return "received"   
 
 
@@ -136,4 +136,10 @@ def findUserByName(username):
 # return data set
 @app.get("/predict")
 def dataset():
-   return md.datapts(),200;
+   try:
+      return md.datapts(),200;
+   except Exception as e:
+      return {
+         "statusCode":500,
+         "ErrorMessage":e
+      },500

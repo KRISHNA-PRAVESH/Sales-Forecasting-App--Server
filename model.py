@@ -33,15 +33,9 @@ def plotGraph():
     plt.show()
 
 
-def predictions(start,end):
-     # predict
-    pred = predict(start,end)
-    dates = pd.date_range(start=start,end=end)
-    sales = pred.tolist()
-    return pred
 
 def main(periodicity,num):
-    global df,pred,res
+    global df,pred,res,initial,final
      # Reading the dataset 
     df = pd.read_csv('uploads/dataset.csv',index_col='Date', parse_dates=True)
     # df['Date'] = pd.to_datetime(df['Date'])
@@ -54,41 +48,33 @@ def main(periodicity,num):
     res =  buildModel()
     # Evaluation
     # metrics()
-    start = '2012-12-01'
-    end = '2015-12-01'
-    pred = predictions(start,end)
+    initial = df.index[len(df)-1]
+    final = initial + pd.Timedelta(days=30*int(num))
+    pred = predict(initial,final)
 
     # Plotting the graph
     plotGraph()
 
+# returns the data points for the graph
+def datapts():
+    dates = pd.date_range(start=initial,end=final,freq='M')
+    labels = []
+    for x in dates:
+      labels.append(str(x).split(" ")[0])
+    
+    sales = pred.tolist()
+    response = {
+      "labels":labels,
+      "sales":sales
+     }
+    return response
 
 
 if __name__=="__main__":
-    main(1,3)
+    main(1,num=36)
    
     
 
-
-
-
-
-
-
-
-
-
-
-
-def datapts():
-    profitData = ['46','56', '57', '79', '92',
-            '20', '57', '76']
-    salesData = ['40','30', '35', '340', '98',
-            '20', '33', '32']
-    response = {
-      "profitData":profitData,
-      "salesData":salesData
-     }
-    return response
 
 
 # # Step 8: Determine the parameters for the seasonal ARIMA model
