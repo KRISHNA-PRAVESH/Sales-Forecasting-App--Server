@@ -3,6 +3,8 @@ from flask import render_template,request,jsonify
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 
+# importing the ML model
+import model as md
 # Create a folder uploads
 UPLOAD_FOLDER = 'uploads'
 
@@ -56,6 +58,7 @@ def signup():
        "responseMessage":"Internal Server Error"
     }),500;
 
+
 @app.post("/login")
 def login():
    try:    
@@ -102,19 +105,20 @@ def login():
 def save():
     # req: is of dict type
     # req = request.get_json()
-    # print(req)
-    # print(req.get('name'))
-    # print(req.get('age'))
+
     print(request)
     print(request.form.get('periodicity'))
     print(request.form.get('num'))
-
+    periodicity = request.form.get('periodicity')
+    num = request.form.get('num')
     #Gives all the files in the request payload in the form of ImmutableMultiDict(provided by werkzeug)
     file = request.files['File']
     print(file.filename)
    
     # Saving the received file in the uploads folder with the name dataset.csv
     file.save(f"{UPLOAD_FOLDER}/dataset.csv")
+   #  Building model
+   #  md.main(periodicity,num)
     return "received"   
 
 
@@ -130,14 +134,6 @@ def findUserByName(username):
     return None
 
 # return data set
-@app.get("/dataset")
+@app.get("/predict")
 def dataset():
-   profitData = ['46','56', '57', '79', '92',
-            '20', '57', '76']
-   salesData = ['40','30', '35', '340', '98',
-            '20', '33', '32']
-   response = {
-      "profitData":profitData,
-      "salesData":salesData
-   }
-   return response,200;
+   return md.datapts(),200;
