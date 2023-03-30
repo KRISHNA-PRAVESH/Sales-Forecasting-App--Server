@@ -35,7 +35,7 @@ def plotGraph():
 
 
 def main(periodicity,num):
-    global df,pred,res,initial,final
+    global df,pred,res,initial,final,dates,labels
      # Reading the dataset 
     df = pd.read_csv('uploads/dataset.csv',index_col='Date', parse_dates=True)
     # df['Date'] = pd.to_datetime(df['Date'])
@@ -49,11 +49,11 @@ def main(periodicity,num):
     # Evaluation
     # metrics()
     initial = df.index[len(df)-1]
-    final = initial + pd.Timedelta(days=31*int(num))
+    final = initial + pd.Timedelta(days=31*(int(num)-1))
     pred = predict(initial,final)
 
     # Plotting the graph
-    plotGraph()
+    # plotGraph()
 
 # returns the data points for the graph
 def datapts():
@@ -70,6 +70,9 @@ def datapts():
       "sales":sales
      }
     return response 
+
+
+
 
 
 if __name__=="__main__":

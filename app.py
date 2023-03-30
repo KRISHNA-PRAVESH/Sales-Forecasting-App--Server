@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template,request,jsonify
+from flask import render_template,request,jsonify,send_file
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 import os
@@ -105,6 +105,7 @@ def logout():
       # deleting the saved files when the user logs out
       os.remove(f"{UPLOAD_FOLDER}/dataset.csv")
       os.remove(f"{UPLOAD_FOLDER}/predictions.csv")
+      
    except:
       # If file didnot exist in the first place
       pass
@@ -155,3 +156,9 @@ def dataset():
          "statusCode":500,
          "ErrorMessage":e
       },500
+
+#Sending the predicted csv file to the user
+@app.route('/get_csv')
+def get_predicted_sales():
+    filepath = 'uploads/predictions.csv'
+    return send_file(filepath, as_attachment=True)
