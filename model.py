@@ -2,10 +2,14 @@ import pandas as pd
 # for SARIMA
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+import warnings
 
+# Suppress all warnings
+warnings.filterwarnings('ignore')
 
 def buildModel():
     # Fit the seasonal ARIMA model
+    # the original non-stationary dataset is used directly to fit the SARIMA model, since SARIMA can handle non-stationary data with seasonal patterns. 
     model = sm.tsa.statespace.SARIMAX(df, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
     res1 = model.fit()
     print('build - done')
@@ -14,6 +18,8 @@ def buildModel():
 def predict(start,end):
     # Predicting values
     pred1 = res.predict(start = start, end = end)
+    pred_df = pd.DataFrame(pred1)
+    pred_df.index.name = 'date'
     pred1.to_csv('uploads/predictions.csv')
     print('prediction - done')
     return pred1
@@ -22,6 +28,7 @@ def metrics():
      # Evaluate the model
     mape = ((abs(df['Total'] - pred) / df['Total']).mean()) * 100
     print('MAPE:', mape)
+    
 
 def plotGraph():
     plt.plot(df['Total'], label='Actual')
@@ -35,11 +42,13 @@ def plotGraph():
 
 
 def main(periodicity,num):
-    global df,pred,res,initial,final,dates,labels
-     # Reading the dataset 
-    df = pd.read_csv('uploads/dataset.csv',index_col='Date', parse_dates=True)
+  # Reading the dataset 
+ global df,pred,res,initial,final,dates,labels
+ df = pd.read_csv('uploads/dataset.csv',index_col='Date', parse_dates=True)
+ if(periodicity=='Months'):
+  
     # df['Date'] = pd.to_datetime(df['Date'])
-    print(df.head())
+    # print(df.head())
 
     # Difference the time series to make it stationary
     # df_diff = df.diff().dropna() #sales[i] = sales[i]-sales[i-1] , i = 2 to n
@@ -54,6 +63,36 @@ def main(periodicity,num):
 
     # Plotting the graph
     # plotGraph()
+ else:
+    if(periodicity=='Days'): 
+      # resample to daily frequency
+      df = df.resample('D').sum()
+    if(periodicity=='Weeks'):
+       # resample to Weekly frequency
+      df = df.resample('W').sum()
+       
+
+    # fit ETS model
+    from statsmodels.tsa.holtwinters import ExponentialSmoothing
+    model = ExponentialSmoothing(df, seasonal_periods=12, trend='add', seasonal='add')
+    model_fit = model.fit()
+
+    initial = df.index[len(df)-1]
+    if(periodicity=='Days'): final = initial + pd.Timedelta(days = int(num))
+    if(periodicity=='Weeks'): final = initial + pd.Timedelta(weeks = int(num))
+    print(initial)
+    print(final)
+    # make forecast
+    forecast_daily = model_fit.predict(start=initial, end=final)
+    pred = forecast_daily
+    # print(forecast_daily)
+    # plt.plot(forecast_daily)
+    # plt.show()
+    forecast_daily = pd.DataFrame(forecast_daily)
+    forecast_daily.index.name = 'date'
+    forecast_daily = forecast_daily.rename(columns={0: 'Predicted Sales'})
+    forecast_daily.to_csv('uploads/predictions.csv')
+    print('prediction - done')
 
 # returns the data points for the graph
 def datapts():
@@ -62,21 +101,23 @@ def datapts():
     labels = []
     for x in dates:
       labels.append(str(x).split("T")[0])
-    
+    # print(labels)
     # Values of y -axis
     sales = pred.tolist()
+    # print(sales)
     response = {
       "labels":labels,
       "sales":sales
      }
+    # print(response)
     return response 
 
 
 
 
-
-if __name__=="__main__":
-    main(1,num=36)
+# if __name__=="__main__":
+#     # main('Months',num=10)
+#     # datapts()
    
     
 

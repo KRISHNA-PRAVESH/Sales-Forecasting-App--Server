@@ -150,12 +150,12 @@ def findUserByName(username):
 @app.get("/predict")
 def dataset():
    try:
-      return md.datapts(),200;
+      response = md.datapts()
+      print(response)
+      return response,200
    except Exception as e:
-      return {
-         "statusCode":500,
-         "ErrorMessage":e
-      },500
+      print(e)
+      return "Internal Server Error",500
 
 #Sending the predicted csv file to the user
 @app.route('/get_csv')
