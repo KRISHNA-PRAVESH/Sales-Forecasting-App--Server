@@ -105,6 +105,7 @@ def logout():
       # deleting the saved files when the user logs out
       os.remove(f"{UPLOAD_FOLDER}/dataset.csv")
       os.remove(f"{UPLOAD_FOLDER}/predictions.csv")
+      os.remove(f"{UPLOAD_FOLDER}/test_set_results.csv")
       
    except:
       # If file didnot exist in the first place
@@ -151,7 +152,16 @@ def findUserByName(username):
 def dataset():
    try:
       response = md.datapts()
-      print(response)
+      # print(response)
+      return response,200
+   except Exception as e:
+      print(e)
+      return "Internal Server Error",500
+   
+@app.get("/test_set")
+def test_set():
+   try:
+      response = md.datapts_test()
       return response,200
    except Exception as e:
       print(e)
