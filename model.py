@@ -2,6 +2,8 @@ import pandas as pd
 # for SARIMA
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 import warnings
 
 # Suppress all warnings
@@ -22,7 +24,7 @@ def test_set_results():
     pred1 = res.predict(start = start_test, end = end_test)
     pred_df = pd.DataFrame(pred1)
     pred_df.index.name = 'date'
-    pred1.to_csv('uploads/test_set_results.csv')
+    pred1.to_csv('results/test_set_results.csv')
     print('Test set prediction - done')
     return pred1
    
@@ -32,14 +34,21 @@ def future_forecast(start,end):
     pred1 = res.predict(start = start, end = end)
     pred_df = pd.DataFrame(pred1)
     pred_df.index.name = 'date'
-    pred1.to_csv('uploads/predictions.csv')
+    pred1.to_csv('results/predictions.csv')
     print('prediction - done')
     return pred1
 
 def metrics():
-     # Evaluate the model
-    mape = ((abs(df['Total'] - pred) / df['Total']).mean()) * 100
-    print('MAPE:', mape)
+     #  mean squared error (MSE)
+    mse = round(mean_squared_error(test_data, test_results),2)
+
+    #  root mean squared error (RMSE)
+    rmse = round(np.sqrt(mse),2)
+
+    #  mean absolute error (MAE)
+    mae = round(mean_absolute_error(test_data['Total'], test_results),2)
+
+    return mse,rmse,mae
     
 
 def plotGraph(predicted):
@@ -107,7 +116,7 @@ def main(periodicity,num):
     forecast_daily = pd.DataFrame(forecast_daily)
     forecast_daily.index.name = 'date'
     forecast_daily = forecast_daily.rename(columns={0: 'Predicted Sales'})
-    forecast_daily.to_csv('uploads/predictions.csv')
+    forecast_daily.to_csv('results/predictions.csv')
     print('prediction - done')
 
 # returns the data points for the graph
@@ -137,10 +146,14 @@ def datapts_test():
       labels.append(str(x).split("T")[0])
    sales = test_results.tolist()
    actual = test_data['Total'].tolist()
+   mse,rmse,mae = metrics()
    response = {
       "labels":labels,
       "predicted":sales,
-      "actual":actual
+      "actual":actual,
+      "mse":mse,
+      "rmse":rmse,
+      "mae":mae
    }
    return response
 

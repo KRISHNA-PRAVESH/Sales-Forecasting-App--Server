@@ -1,13 +1,15 @@
 from flask import Flask
-from flask import render_template,request,jsonify,send_file
+from flask import request,jsonify,send_file,send_from_directory
 from flask_cors import CORS
 from flask_mysqldb import MySQL
+import zipfile
 import os
 
 # importing the ML model
 import model as md
 # Create a folder uploads
 UPLOAD_FOLDER = 'uploads'
+RESULT_FOLDER = 'results'
 
 
 app = Flask(__name__)
@@ -104,8 +106,9 @@ def logout():
    try:
       # deleting the saved files when the user logs out
       os.remove(f"{UPLOAD_FOLDER}/dataset.csv")
-      os.remove(f"{UPLOAD_FOLDER}/predictions.csv")
-      os.remove(f"{UPLOAD_FOLDER}/test_set_results.csv")
+      os.remove(f"{RESULT_FOLDER}/predictions.csv")
+      os.remove(f"{RESULT_FOLDER}/test_set_results.csv")
+      os.remove(f"{RESULT_FOLDER}/output.zip")
       
    except:
       # If file didnot exist in the first place
@@ -170,5 +173,16 @@ def test_set():
 #Sending the predicted csv file to the user
 @app.route('/get_csv')
 def get_predicted_sales():
-    filepath = 'uploads/predictions.csv'
-    return send_file(filepath, as_attachment=True)
+   try:
+    #Sending the dataset, testset results and predicted csv files as a zip
+    files = ['uploads/dataset.csv','results/test_set_results.csv','results/predictions.csv']
+    zip = zipfile.ZipFile('results/output.zip',mode='w',compression= zipfile.ZIP_DEFLATED) #zip_deflated -> Standard ZIP compression
+    for file in files:
+      #  Writing all the files into the zip file
+       zip.write(file)
+    zip.close()
+    return send_file('results/output.zip', as_attachment=True)
+   
+   except Exception as e:
+      print(e)
+      return "Internal Server Error",500
